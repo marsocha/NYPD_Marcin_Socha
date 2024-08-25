@@ -108,3 +108,5 @@ def top_n_quadratic_quality_per_region(df, n):
 
 def add(x,y):
     return x+y
+def multiply(x,y,z):
+    return x*y*z
