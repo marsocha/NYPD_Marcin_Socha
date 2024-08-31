@@ -40,21 +40,21 @@ def harmonic_average(values):
 def top_n_quality_per_region(df, n):
     df['quality'] = df['averageRating'] * np.log(df['numVotes'])
     
-    # Create an empty DataFrame to store top n rows for each region based on quality
+    # Tworzenie pustej DataFrame do przechowywania n najlepszych wierszy dla każdego regionu na podstawie jakości
     top_n_quality_per_region = pd.DataFrame()
     
-    # Group by 'region' and apply the operations
+    # Grupowanie według 'region' i zastosowanie operacji
     grouped = df.groupby('region')
     
     for region, group in grouped:
-        # Sort by 'quality' in descending order and take the top n
+        # Sortowanie według 'quality' malejąco i wybieranie n najlepszych
         top_n_quality = group.sort_values('quality', ascending=False).head(n)
         top_n_quality_per_region = pd.concat([top_n_quality_per_region, top_n_quality])
     
-    # Now calculate the quadratic average of the top n quality values for each region
+    # Teraz oblicz średnią harmoniczną z n najlepszych wartości jakości dla każdego regionu
     region_quad_quality = top_n_quality_per_region.groupby('region')['quality'].apply(harmonic_average)
     
-    # Sort by the calculated quadratic average and take the top 10 regions
+    # Sortowanie według obliczonej średniej kwadratowej i wybieranie 10 najlepszych regionów
     top_10_quality_regions = region_quad_quality.sort_values(ascending=False).head(10)
     
     return top_10_quality_regions
@@ -75,54 +75,57 @@ def categorize_region(regions):
     elif 'GB' in regions and 'US' not in regions:
         return 'GB'
     else:
-        # If neither 'UK' nor 'US' is present, return the list of regions as a combined string
+        # Jeśli ani 'GB', ani 'US' nie są obecne, zwróć listę regionów jako połączony ciąg
         return ','.join(sorted(regions))
 
 # Function to calculate top n quality averages per region using harmonic mean
 def top_n_quality_per_region_harmonic(df, n):
+    '''
+    Oblicza średnią harmoniczną z n najlepszych filmów dla kazdego danego regionu
+    '''
     
-    # Create an empty DataFrame to store top n rows for each region based on quality
+    # Tworzenie pustej DataFrame do przechowywania n najlepszych wierszy dla każdego regionu na podstawie jakości
     top_n_quality_per_region = pd.DataFrame()
     
-    # Group by 'region' and apply the operations
+    # Grupowanie według 'region' i zastosowanie operacji
     grouped = df.groupby('region')
     
     for region, group in grouped:
-        # Sort by 'quality' in descending order and take the top n
+        # Sortowanie według 'quality' malejąco i wybieranie n najlepszych
         top_n_quality = group.sort_values('quality', ascending=False).head(n)
         top_n_quality_per_region = pd.concat([top_n_quality_per_region, top_n_quality])
     
-    # Now calculate the harmonic mean of the top n quality values for each region
+    # Teraz oblicz średnią harmoniczną z n najlepszych wartości jakości dla każdego regionu
     region_harmonic_quality = top_n_quality_per_region.groupby('region')['quality'].apply(harmonic_average)
     
-    # Sort by the calculated harmonic mean and take the top 10 regions
+    # Sortowanie według obliczonej średniej harmonicznej i wybieranie 10 najlepszych regionów
     top_10_quality_regions = region_harmonic_quality.sort_values(ascending=False).head(10)
     
     return top_10_quality_regions
 
-# Function to calculate harmonic mean of top n quality values per region
+# Funkcja do obliczania średniej harmonicznej z n najlepszych wartości jakości na region
 def calculate_harmonic_average_top_n(grouped_df, n=10):
     '''
     Dla kadego kraju wylicza średnią harmoniczną naszej metryki
     dla n (domyślnie 10) filmów z tego regionu (grupy regionów)
     '''
-    # Create an empty dictionary to store harmonic means
+    # Tworzenie pustego słownika do przechowywania średnich harmonicznych
     region_harmonic_averages = {}
 
-    # Group by 'region' and apply the harmonic mean calculation
+    # Grupowanie według 'region' i zastosowanie obliczania średniej harmonicznej
     grouped = grouped_df.groupby('region')
 
     for region, group in grouped:
-        # Sort by 'quality' in descending order and take the top n
+        # Sortowanie według 'quality' malejąco i wybieranie n najlepszych
         top_n_quality = group.sort_values('quality', ascending=False).head(n)['quality']
-        # If there are fewer than n movies, skip this region
+        # Jeśli jest mniej niż n filmów, pomiń ten region
         if len(top_n_quality) < n:
             continue
-        # Calculate the harmonic mean
+        # Obliczanie średniej harmonicznej
         harmonic_average_value = harmonic_average(top_n_quality)
         region_harmonic_averages[region] = harmonic_average_value
 
-    # Convert to DataFrame for easier ranking and sorting
+    # Konwersja do DataFrame dla łatwiejszego sortowania
     region_harmonic_averages_df = pd.DataFrame.from_dict(region_harmonic_averages, orient='index', columns=['harmonic_average'])
     region_harmonic_averages_df = region_harmonic_averages_df.sort_values(by='harmonic_average', ascending=False)
 
@@ -133,13 +136,13 @@ def calculate_harmonic_average_for_all_movies(grouped_df):
     Dla kadego kraju wylicza średnią harmoniczną naszej metryki
     dla wszystkich filmów z tego regionu (grupy regionów)
     '''
-    # Group by 'region' and apply the harmonic mean calculation to 'quality'
+    # Grupowanie według 'region' i zastosowanie obliczania średniej harmonicznej dla 'quality'
     region_harmonic_averages = grouped_df.groupby('region')['quality'].agg(harmonic_average)
     
-    # Convert to DataFrame for easier sorting
+    # Konwersja do DataFrame dla łatwiejszego sortowania
     region_harmonic_averages_df.columns = ['region', 'harmonic_average']
     
-    # Sort by harmonic mean in descending order
+    # Sortowanie według średniej harmonicznej malejąco
     region_harmonic_averages_df = region_harmonic_averages_df.sort_values(by='harmonic_average', ascending=False)
     region_harmonic_averages_df = region_harmonic_averages.reset_index()
     
@@ -154,3 +157,17 @@ def get_best_and_worst_movies(group):
     best = group.iloc[0]['tconst']
     second_best = group.iloc[1]['tconst']
     return pd.Series([best, second_best])
+
+def convert_gdp_format(txt: str):
+    """
+    Converts format of gdp column.
+    """
+
+    txt = txt.strip()
+
+    if txt == "-":
+        ret = np.nan
+    else:
+        ret = float(txt.replace(",", ""))
+        
+    return ret
