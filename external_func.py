@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
+import cProfile
+import pstats
+
 
 def wczytaj_dane(folder, nazwa_pliku, pliki):
     '''
@@ -21,6 +24,7 @@ def pobierz_nazwy_plikow(folder):
     Z danego folderu zczytuje wszystkie nazwy plików w nim zawartych
     '''
     pliki = os.listdir(folder)
+    pliki = [element for element in pliki if element != '.DS_Store']
     pliki_tsv = [plik for plik in pliki]
     return pliki_tsv
 
@@ -171,3 +175,24 @@ def convert_gdp_format(txt: str):
         ret = float(txt.replace(",", ""))
         
     return ret
+
+def profile_function(func, file_name='profiling_results.txt'):
+    '''
+    Funckja do zapisywania informacji o profilowaniu
+    poszczególnej funkcji
+    '''
+    #Tworzenie obiekt Profile
+    prof = cProfile.Profile()
+    
+    # Wywołujemy funkcje
+    prof.enable()  # Start profilowanie
+    func()         # Wywołanie funkcji
+    prof.disable() # Stop profilowania
+    
+    # Zapis profilowania do pliku
+    with open(file_name, 'a') as f:  # Uzywamy 'a', zeby dodac do pliku (append)
+        stats = pstats.Stats(prof, stream=f)
+        stats.sort_stats('cumulative')  # Sortowania po czasie trwania
+        stats.print_stats()
+    
+    print(f"Profiling results saved to {file_name}")
