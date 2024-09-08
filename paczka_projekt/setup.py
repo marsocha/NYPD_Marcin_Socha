@@ -25,7 +25,7 @@ setup(
         'cProfile',
     ],
     package_data={
-        'paczka_projekt': ['25_08.ipynb'],  # Include the notebook in the package
+        'paczka_projekt': ['marcin_socha_NYPD.ipynb'],  # Include the notebook in the package
     },
     include_package_data=True,
     entry_points={
