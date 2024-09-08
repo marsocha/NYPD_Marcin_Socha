@@ -18,6 +18,7 @@ setup(
         'pandas',
         'numpy',
         'matplotlib',
+        'unittest',
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
